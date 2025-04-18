@@ -51,4 +51,9 @@
             @endif
         </div>
     </div>
+    <script>
+        document.addEventListener('new-message-id', function(event) {
+            console.log(event.detail.id);
+        });
+    </script>
 </div>

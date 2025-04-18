@@ -9,17 +9,17 @@ use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Message;
+
 
 class SendRealtimeMessage implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $transmittedData;
+    public $data;
 
-    public function __construct(Message $transmittedData)
+    public function __construct(array $data)
     {
-        $this->transmittedData = $transmittedData;
+        $this->data = $data;
     }
     public function broadcastOn(): array
     {

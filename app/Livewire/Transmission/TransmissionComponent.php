@@ -21,17 +21,18 @@ class TransmissionComponent extends Component
 
     public function apiTransmit(Request $request)
     {
-        $transmittedDatas = $request->input('messages');
-        Log::info('Received transmission:', $transmittedDatas);
-        $transmittedData = $this->transmission->transmit($transmittedDatas);
-        if ($transmittedData) {
-            event(new SendRealtimeMessage($transmittedData));
-            return response()->json(['status' => 'The data has been transmitted successfully!'], 200);
-        } else {
-            return response()->json(['status' => 'Error transmitting data!'], 400);
+        try {
+            $storeDataList = $request->input('data');
+
+            foreach ($storeDataList as $data) {
+                $transmittedData = $this->transmission->transmit($data);
+                event(new SendRealtimeMessage($transmittedData)); // Optional: one per store
+            }
+            return response()->json(['status' => 'All data transmitted successfully!'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'Exception occurred!', 'error' => $e->getMessage()], 500);
         }
     }
-
     public function deleteMessage($id)
     {
         Message::find($id)->delete();
@@ -40,7 +41,7 @@ class TransmissionComponent extends Component
     #[On('echo:my-channel,SendRealtimeMessage')]
     public function handleSendRealtimeMessage($transmittedData): void
     {
-        $this->dispatch('new-message-id', id: $transmittedData['transmittedData']['id']);
+        $this->dispatch('new-message-id', id: $transmittedData);
     }
 
 
