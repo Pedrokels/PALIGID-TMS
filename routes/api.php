@@ -16,8 +16,8 @@ Route::post('/transmit', function (Request $request) {
         // Broadcast event to Livewire
         // broadcast(new \App\Events\NewMessageReceived($message))->toOthers();
         event(new SendRealtimeMessage($message));
-        return response()->json(['status' => 'success']);
+        return response()->json(['status' => 'The data has been transmitted successfully!'], 200);
     } else {
-        return response()->json(['status' => 'error']);
+        return response()->json(['status' => 'Error transmitting data!'], 400);
     }
 });
