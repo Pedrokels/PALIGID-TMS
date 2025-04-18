@@ -7,5 +7,5 @@ use Illuminate\Http\Request;
 
 interface TransmissionRepositoryInterface
 {
-    public function transmit($request);
+    public function transmit($transmittedDatas);
 }

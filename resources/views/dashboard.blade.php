@@ -1,4 +1,4 @@
 <x-layouts.app :title="__('Dashboard')">
 
-    <livewire:task.task-component />
+    <livewire:transmission.transmission-component />
 </x-layouts.app>

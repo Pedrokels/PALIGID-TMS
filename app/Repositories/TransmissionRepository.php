@@ -9,13 +9,14 @@ use App\Events\SendRealtimeMessage;
 
 class TransmissionRepository implements TransmissionRepositoryInterface
 {
-    public function transmit($request)
+    public function transmit($transmittedDatas)
     {
-        $message = Message::create([
-            'title' => $request->title,
-            'description' => $request->description,
-        ]);
-
-        return $message;
+        foreach ($transmittedDatas as $data) {
+            $transmittedData = Message::updateOrCreate(
+                ['id' => $data['id']], // Use a unique key or change if needed
+                $data
+            );
+        }
+        return $transmittedData;
     }
 }

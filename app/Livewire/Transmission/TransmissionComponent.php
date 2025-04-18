@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Livewire\Task;
+namespace App\Livewire\Transmission;
 
-use Flux\Flux;
-use App\Events\SendRealtimeMessage;
 use Livewire\Component;
-use Livewire\Attributes\On;
-use Illuminate\Http\Request;
 use App\Models\Message;
 use App\Repositories\TransmissionRepositoryInterface;
+use App\Events\SendRealtimeMessage;
+use Livewire\Attributes\On;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
-class TaskComponent extends Component
+class TransmissionComponent extends Component
 {
     protected $transmission;
 
@@ -21,9 +21,11 @@ class TaskComponent extends Component
 
     public function apiTransmit(Request $request)
     {
-        $transmittedMessage = $this->transmission->transmit($request);
-        if ($transmittedMessage) {
-            event(new SendRealtimeMessage($transmittedMessage));
+        $transmittedDatas = $request->input('messages');
+        Log::info('Received transmission:', $transmittedDatas);
+        $transmittedData = $this->transmission->transmit($transmittedDatas);
+        if ($transmittedData) {
+            event(new SendRealtimeMessage($transmittedData));
             return response()->json(['status' => 'The data has been transmitted successfully!'], 200);
         } else {
             return response()->json(['status' => 'Error transmitting data!'], 400);
@@ -36,19 +38,20 @@ class TaskComponent extends Component
     }
 
     #[On('echo:my-channel,SendRealtimeMessage')]
-    public function handleSendRealtimeMessage($message): void
+    public function handleSendRealtimeMessage($transmittedData): void
     {
-        $this->dispatch('new-message-id', id: $message['message']['id']);
+        $this->dispatch('new-message-id', id: $transmittedData['transmittedData']['id']);
     }
+
 
     public function render()
     {
-        // $messages = Message::latest()->take(10)->get();
         $latestMessage = Message::latest()->first();
         $messages = Message::orderByDesc('id')->take(4)->get();
 
         $messageCount = Message::count();
-        return view('livewire.task.task-component', [
+
+        return view('livewire.transmission.transmission-component', [
             'messages' => $messages,
             'messageCount' => $messageCount
         ]);

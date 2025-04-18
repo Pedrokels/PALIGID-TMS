@@ -1,10 +1,7 @@
 <?php
 
-use App\Livewire\Task\TaskComponent;
-use Illuminate\Console\View\Components\Task;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Models\Message;
-use App\Events\SendRealtimeMessage;
+use App\Livewire\Transmission\TransmissionComponent;
 
-Route::post('/transmit', [TaskComponent::class, 'apiTransmit'])->name('transmit');
+// Transmission API
+Route::post('/transmit', [TransmissionComponent::class, 'apiTransmit'])->name('transmit');

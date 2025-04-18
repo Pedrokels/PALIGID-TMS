@@ -15,11 +15,11 @@ class SendRealtimeMessage implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $message;
+    public $transmittedData;
 
-    public function __construct(Message $message)
+    public function __construct(Message $transmittedData)
     {
-        $this->message = $message;
+        $this->transmittedData = $transmittedData;
     }
     public function broadcastOn(): array
     {
