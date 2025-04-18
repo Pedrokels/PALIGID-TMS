@@ -2,32 +2,33 @@
 
 namespace App\Livewire\Task;
 
+use Flux\Flux;
 use App\Events\SendRealtimeMessage;
 use Livewire\Component;
 use Livewire\Attributes\On;
 
+use App\Models\Message;
 
 class TaskComponent extends Component
 {
 
-    public string $message;
-
-    public function sendEvent(): void
+    public function deleteMessage($id)
     {
-        event(new SendRealtimeMessage($this->message));
-        $this->message = '';
+        Message::find($id)->delete();
     }
 
     #[On('echo:my-channel,SendRealtimeMessage')]
-    public function handleSendRealtimeMessage(): void
+    public function handleSendRealtimeMessage($message): void
     {
-
-        $this->message = 'event received';
+        $messages = Message::latest()->take(10)->get();
+        $this->dispatch('new-message', message: $message);
     }
-
 
     public function render()
     {
-        return view('livewire.task.task-component');
+        $messages = Message::latest()->take(10)->get();
+        return view('livewire.task.task-component', [
+            'messages' => $messages
+        ]);
     }
 }

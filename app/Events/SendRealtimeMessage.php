@@ -10,14 +10,16 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
+use App\Models\Message;
+
 class SendRealtimeMessage implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public string $message;
+    public $message;
 
 
-    public function __construct(string $message)
+    public function __construct(Message $message)
     {
         $this->message = $message;
     }
