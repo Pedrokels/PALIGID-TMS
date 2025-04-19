@@ -61,7 +61,8 @@ class TransmissionComponent extends Component
             'stores' => $stores,
             'provinceCount' => $provinceCount,
             'municipalityCount' => $municipalityCount,
-            'barangayCount' => $barangayCount
+            'barangayCount' => $barangayCount,
+            'mapboxToken' => env('MAPBOX_TOKEN')
         ]);
     }
 }
