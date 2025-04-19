@@ -11,4 +11,12 @@ class Store extends Model
     {
         return $this->belongsTo(Barangay::class);
     }
+    public function municipality()
+    {
+        return $this->belongsTo(Municipality::class);
+    }
+    public function area()
+    {
+        return $this->belongsTo(Area::class);
+    }
 }

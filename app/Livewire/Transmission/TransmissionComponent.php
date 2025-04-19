@@ -9,6 +9,10 @@ use App\Events\SendRealtimeMessage;
 use Livewire\Attributes\On;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Models\Area;
+use App\Models\Municipality;
+use App\Models\Barangay;
+use App\Models\Store;
 
 class TransmissionComponent extends Component
 {
@@ -23,7 +27,6 @@ class TransmissionComponent extends Component
     {
         try {
             $storeDataList = $request->input('data');
-
             foreach ($storeDataList as $data) {
                 $transmittedData = $this->transmission->transmit($data);
                 event(new SendRealtimeMessage($transmittedData)); // Optional: one per store
@@ -35,26 +38,30 @@ class TransmissionComponent extends Component
     }
     public function deleteMessage($id)
     {
-        Message::find($id)->delete();
+        Store::find($id)->delete();
     }
 
     #[On('echo:my-channel,SendRealtimeMessage')]
-    public function handleSendRealtimeMessage($transmittedData): void
+    public function handleSendRealtimeMessage($data): void
     {
-        $this->dispatch('new-message-id', id: $transmittedData);
+        $storesID = Store::latest()->first()->id;
+        $this->dispatch('new-message-id', id: $storesID);
     }
-
 
     public function render()
     {
-        $latestMessage = Message::latest()->first();
-        $messages = Message::orderByDesc('id')->take(4)->get();
-
-        $messageCount = Message::count();
+        $latestStores = Store::latest()->first();
+        $stores = Store::orderByDesc('id')->take(4)->get();
+        $provinceCount = Area::count();
+        $municipalityCount = Municipality::count();
+        $barangayCount = Barangay::count();
 
         return view('livewire.transmission.transmission-component', [
-            'messages' => $messages,
-            'messageCount' => $messageCount
+            'latestStores' => $latestStores,
+            'stores' => $stores,
+            'provinceCount' => $provinceCount,
+            'municipalityCount' => $municipalityCount,
+            'barangayCount' => $barangayCount
         ]);
     }
 }
