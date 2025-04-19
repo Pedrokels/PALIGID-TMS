@@ -1,15 +1,14 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Services;
 
-use App\Repositories\TransmissionRepositoryInterface;
 use App\Models\Area;
 use App\Models\Municipality;
 use App\Models\Barangay;
 use App\Models\Store;
 use Exception;
 
-class TransmissionRepository implements TransmissionRepositoryInterface
+class TransmissionServices
 {
     public function transmit($storeDataList)
     {

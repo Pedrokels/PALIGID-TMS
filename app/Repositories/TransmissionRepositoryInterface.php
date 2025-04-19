@@ -7,5 +7,5 @@ use Illuminate\Http\Request;
 
 interface TransmissionRepositoryInterface
 {
-    public function transmit($data);
+    public function transmit(array $storeDataList);
 }

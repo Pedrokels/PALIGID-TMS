@@ -13,56 +13,77 @@ use App\Models\Area;
 use App\Models\Municipality;
 use App\Models\Barangay;
 use App\Models\Store;
+use App\Services\TransmissionServices;
 
 class TransmissionComponent extends Component
 {
+    // protected $transmission;
+
+    // public function __construct()
+    // {
+    //     $this->transmission = app(TransmissionRepositoryInterface::class);
+    // }
+
     protected $transmission;
 
-    public function __construct()
+    public function boot()
     {
-        $this->transmission = app(TransmissionRepositoryInterface::class);
+        $this->transmission = new TransmissionServices();
     }
 
     public function apiTransmit(Request $request)
     {
-        try {
-            $storeDataList = $request->input('data');
-            foreach ($storeDataList as $data) {
-                $transmittedData = $this->transmission->transmit($data);
-                event(new SendRealtimeMessage($transmittedData)); // Optional: one per store
-            }
-            return response()->json(['status' => 'All data transmitted successfully!'], 200);
-        } catch (\Exception $e) {
-            return response()->json(['status' => 'Exception occurred!', 'error' => $e->getMessage()], 500);
-        }
+        $result = $this->transmission->transmit($request->input('data'));
+        return response()->json($result, $result['success'] ? 200 : 500);
     }
+
     public function deleteMessage($id)
     {
         Store::find($id)->delete();
     }
 
-    #[On('echo:my-channel,SendRealtimeMessage')]
-    public function handleSendRealtimeMessage($data): void
+    #[On('echo:transmission-channel,SendRealtimeTransmit')]
+    public function handleSendRealtimeTransmit($data): void
     {
-        $storesID = Store::latest()->first()->id;
-        $this->dispatch('new-message-id', id: $storesID);
+        $strID = Store::latest()->first()->id;
+        $this->dispatch('transmitted', id: $strID);
     }
 
     public function render()
     {
-        $latestStores = Store::latest()->first();
-        $stores = Store::orderByDesc('id')->take(4)->get();
-        $provinceCount = Area::count();
-        $municipalityCount = Municipality::count();
-        $barangayCount = Barangay::count();
 
+
+        $latestStores = Store::latest()->first();
+        $stores = Store::orderByDesc('id')->take(3)->get();
+
+        // Buenget Stores Count
+        $benguetArea = Area::where('name', 'Benguet')->first();
+        $benguetStoreCount = $benguetArea ? Store::whereHas('barangay.municipality.area', function ($query) use ($benguetArea) {
+            $query->where('id', $benguetArea->id);
+        })->count() : 0;
+
+        // Biliran Stores Count
+        $biliranArea = Area::where('name', 'Biliran')->first();
+        $biliranStoreCount = $biliranArea ? Store::whereHas('barangay.municipality.area', function ($query) use ($biliranArea) {
+            $query->where('id', $biliranArea->id);
+        })->count() : 0;
+
+        // Sultan Kudarat Stores Count  
+        $sultanKudaratArea = Area::where('name', 'Sultan Kudarat')->first();
+        $sultanKudaratStoreCount = $sultanKudaratArea ? Store::whereHas('barangay.municipality.area', function ($query) use ($sultanKudaratArea) {
+            $query->where('id', $sultanKudaratArea->id);
+        })->count() : 0;
 
         return view('livewire.transmission.transmission-component', [
             'latestStores' => $latestStores,
             'stores' => $stores,
-            'provinceCount' => $provinceCount,
-            'municipalityCount' => $municipalityCount,
-            'barangayCount' => $barangayCount,
+            'benguetStoreCount' => $benguetStoreCount,
+            'biliranStoreCount' => $biliranStoreCount,
+            'sultanKudaratStoreCount' => $sultanKudaratStoreCount,
+            // 'provinceCount' => $provinceCount,
+            // 'municipalityCount' => $municipalityCount,
+            // 'barangayCount' => $barangayCount,
+            // 'storeCount' => $storeCount,
             'mapboxToken' => env('MAPBOX_TOKEN')
         ]);
     }

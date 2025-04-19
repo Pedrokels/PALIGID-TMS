@@ -11,7 +11,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
 
-class SendRealtimeMessage implements ShouldBroadcastNow
+class SendRealtimeTransmit implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -25,7 +25,7 @@ class SendRealtimeMessage implements ShouldBroadcastNow
     {
         return [
             // new PrivateChannel('channel-name'),
-            new Channel('my-channel'),
+            new Channel('transmission-channel'),
         ];
     }
 }
