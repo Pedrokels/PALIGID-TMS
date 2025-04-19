@@ -56,6 +56,7 @@ class TransmissionComponent extends Component
         $municipalityCount = Municipality::count();
         $barangayCount = Barangay::count();
 
+
         return view('livewire.transmission.transmission-component', [
             'latestStores' => $latestStores,
             'stores' => $stores,

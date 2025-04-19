@@ -30,6 +30,7 @@ class TransmissionRepository implements TransmissionRepositoryInterface
         $barangay = Barangay::where('name', $data['barangay'])
             ->where('municipality_id', $municipality->id)
             ->first();
+            
         if (!$barangay) {
             $barangay = Barangay::create([
                 'name' => $data['barangay'],

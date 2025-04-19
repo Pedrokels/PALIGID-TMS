@@ -2,8 +2,8 @@
     <div class="mb-3 flex justify-between items-baseline">
         <flux:breadcrumbs>
             <flux:breadcrumbs.item href="/" icon="home" />
-            <flux:breadcrumbs.item href="/dashboard">Dashboard</flux:breadcrumbs.item>
-            <flux:breadcrumbs.item href="/dashboard">Transmission</flux:breadcrumbs.item>
+            <flux:breadcrumbs.item wire:navigate href="/dashboard">Dashboard</flux:breadcrumbs.item>
+            <flux:breadcrumbs.item wire:navigate href="/dashboard">Transmission</flux:breadcrumbs.item>
         </flux:breadcrumbs>
         <flux:text>Last update -> <flux:link href="/dashboard">Apr 19, 2025 - 3:45 PM</flux:link>
         </flux:text>
@@ -33,9 +33,9 @@
         <!-- Realtime data here -->
         <div>
 
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols-4 gap-4">
 
-                <div class="col-span-1 ">
+                <div class="col-span-2 ">
                     <div x-data="{ latestId: null, transmittedTime: null }" x-init="
             window.addEventListener('new-message-id', event => {
                 latestId = event.detail.id;
@@ -54,39 +54,145 @@
                         <div wire:transition.scale.origin.top wire:key="{{ $store->id }}"
                             x-data
                             :class="latestId === {{ $store->id }} ? 'bg-neutral-600' : 'bg-neutral-50 dark:bg-neutral-900'"
-                            class="p-3  rounded-lg shadow-sm transition-all duration-500">
+                            class="p-4  rounded-lg shadow-sm transition-all duration-500">
                             <h2 class="text-xl font-bold mb-2">{{ $store->name}}</h2>
                             <p class="text-sm mb-4">{{ $store->description }}</p>
                             <p x-show="latestId === {{ $store->id }}" class="text-sm text-gray-500">Transmitted <span x-text="transmittedTime"></span> sec ago</p>
-                            <flux:button variant="danger" wire:click="deleteMessage({{ $store->id }})">Delete</flux:button>
+                            <!-- <flux:button variant="danger" wire:click="deleteMessage({{ $store->id }})">Delete</flux:button> -->
                         </div>
                         @endforeach
                         @endif
                     </div>
                 </div>
-                <div class="col-span-2 relative aspect-video overflow-hidden rounded-2xl bg-neutral-50 dark:bg-neutral-900  flex items-center justify-center">
+                <div class="col-span-2 h-[600px] overflow-hidden rounded-2xl bg-neutral-50 dark:bg-neutral-900  flex items-center justify-center">
 
-                    <style>
-                        #map {
-                            position: relative;
+
+                    <div style="  position: relative;
                             width: 100%;
-                            height: 100%;
-                        }
-                    </style>
-                    <div wire:ignore id="map"></div>
+                            height: 100%;" wire:ignore id="map"></div>
 
                     <script>
-                        mapboxgl.accessToken = '{{ env('MAPBOX_TOKEN') }}'; // Added missing semicolon
-                        const map = new mapboxgl.Map({
-                            container: 'map',
-                            style: 'mapbox://styles/mapbox/dark-v10',
-                            center: [121.7740, 12.8797],
-                            zoom: 4,
-                            projection: 'mercator',
-                            maxBounds: [[112.0, 2.0], [136.0, 23.0]]
+                        function initializeMap() {
+                            mapboxgl.accessToken = '{{ config('services.mapbox.token') }}';
+                            const map = new mapboxgl.Map({
+                                container: 'map',
+                                style: 'mapbox://styles/paligid-2025/cm9nvzh8s002x01sp9ytfay72',
+                                center: [121.7740, 12.8797],
+                                zoom: 4,
+                                projection: 'mercator',
+                            });
+
+                            map.addControl(new mapboxgl.NavigationControl());
+
+                            map.on('load', function () {
+                                // Load the GeoJSON data for Benguet
+                                map.addSource('benguet', {
+                                    'type': 'geojson',
+                                    'data': '/geojson/BENGUET.geojson'
+                                });
+
+                                map.addLayer({
+                                    'id': 'benguet-layer',
+                                    'type': 'fill',
+                                    'source': 'benguet',
+                                    'layout': {},
+                                    'paint': {
+                                        'fill-color': '#888888',
+                                        'fill-opacity': 0.5
+                                    }
+                                });
+
+                                const benguetMarker = new mapboxgl.Marker()
+                                    .setLngLat([120.5887, 16.6158])
+                                    .setPopup(new mapboxgl.Popup({ offset: 25 }).setText('Benguet'))
+                                    .addTo(map);
+
+                                benguetMarker.getElement().addEventListener('click', () => {
+                                    map.setPaintProperty('benguet-layer', 'fill-color', '#FF0000');
+                                    map.fitBounds([
+                                        [120.4, 16.4],
+                                        [120.8, 16.8]
+                                    ], {
+                                        padding: 50,
+                                        duration: 1000
+                                    });
+                                });
+
+                                // Load the GeoJSON data for Biliran
+                                map.addSource('biliran', {
+                                    'type': 'geojson',
+                                    'data': '/geojson/BILIRAN.geojson'
+                                });
+
+                                map.addLayer({
+                                    'id': 'biliran-layer',
+                                    'type': 'fill',
+                                    'source': 'biliran',
+                                    'layout': {},
+                                    'paint': {
+                                        'fill-color': '#888888',
+                                        'fill-opacity': 0.5
+                                    }
+                                });
+
+                                const biliranMarker = new mapboxgl.Marker()
+                                    .setLngLat([124.5240, 11.4711])
+                                    .setPopup(new mapboxgl.Popup({ offset: 25 }).setText('Biliran'))
+                                    .addTo(map);
+
+                                biliranMarker.getElement().addEventListener('click', () => {
+                                    map.setPaintProperty('biliran-layer', 'fill-color', '#FF0000');
+                                    map.fitBounds([
+                                        [124.4, 11.3],
+                                        [124.6, 11.6]
+                                    ], {
+                                        padding: 50,
+                                        duration: 1000
+                                    });
+                                });
+
+                                // Load the GeoJSON data for Sultan Kudarat
+                                map.addSource('sultan_kudarat', {
+                                    'type': 'geojson',
+                                    'data': '/geojson/SULTAN_KUDARAT.geojson'
+                                });
+
+                                map.addLayer({
+                                    'id': 'sultan-kudarat-layer',
+                                    'type': 'fill',
+                                    'source': 'sultan_kudarat',
+                                    'layout': {},
+                                    'paint': {
+                                        'fill-color': '#888888',
+                                        'fill-opacity': 0.5
+                                    }
+                                });
+
+                                const sultanKudaratMarker = new mapboxgl.Marker()
+                                    .setLngLat([124.3228, 6.6380])
+                                    .setPopup(new mapboxgl.Popup({ offset: 25 }).setText('Sultan Kudarat'))
+                                    .addTo(map);
+
+                                sultanKudaratMarker.getElement().addEventListener('click', () => {
+                                    map.setPaintProperty('sultan-kudarat-layer', 'fill-color', '#FF0000');
+                                    map.fitBounds([
+                                        [124.2, 6.5],
+                                        [124.4, 6.7]
+                                    ], {
+                                        padding: 50,
+                                        duration: 1000
+                                    });
+                                });
+                            });
+                        }
+
+                        document.addEventListener('DOMContentLoaded', function () {
+                            initializeMap();
                         });
 
-                        map.addControl(new mapboxgl.NavigationControl());
+                        document.addEventListener('livewire:navigated', function () {
+                            initializeMap();
+                        });
                     </script>
                 </div>
             </div>
